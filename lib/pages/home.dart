@@ -12,7 +12,7 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.grey[200],
+        backgroundColor: Colors.blue[600],
         title: Text('Cash Book'),
         centerTitle: true,
         elevation: 0,
@@ -21,9 +21,11 @@ class _HomeState extends State<Home> {
         child: Column(
           children: <Widget>[
             TextButton.icon(
-                onPressed: () {},
-                icon: Icon(Icons.add_a_photo),
-                label: Text('Add a photo'),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/form');
+                },
+                icon: Icon(Icons.money),
+                label: Text('Cash In'),
             ),
             SizedBox(height: 20.0),
             Row(
