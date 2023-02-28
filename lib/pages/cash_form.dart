@@ -30,7 +30,7 @@ class _CashFormState extends State<CashForm> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.blue[600],
+        backgroundColor: Colors.green[600],
         title: Text('Cash In'),
         centerTitle: true,
         elevation: 0,
@@ -84,8 +84,13 @@ class _CashFormState extends State<CashForm> {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
               child: ElevatedButton(
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(Colors.green),
+                  ),
                   onPressed: () {},
-                  child: Text('Select date')
+                  child: Text(
+                      'Save Cash In',
+                  )
               ),
             ),
           ],
