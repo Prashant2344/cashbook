@@ -127,7 +127,7 @@ class _HomeState extends State<Home> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/form');
+                    Navigator.pushNamed(context, '/cashout');
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -173,7 +173,7 @@ class _HomeState extends State<Home> {
                       ),
                       Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Text('Previoys Balance'),
+                        child: Text('Previous Balance'),
                       ),
                       Padding(
                         padding: EdgeInsets.all(8.0),
