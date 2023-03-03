@@ -13,7 +13,7 @@ class CashForm extends StatefulWidget {
 
 class _CashFormState extends State<CashForm> {
   DateTime selectedDate = DateTime.now();
-  final _cashBox = Hive.box('cashbox');
+  final _cashBox = Hive.box('cashbook');
 
   TextEditingController _amountController = TextEditingController();
   TextEditingController _noteController = TextEditingController();

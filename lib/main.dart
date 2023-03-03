@@ -2,13 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:cashbook/pages/home.dart';
 import 'package:cashbook/pages/cash_form.dart';
 import 'package:cashbook/pages/cash_out.dart';
+import 'package:cashbook/models/cash_model.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 void main() async{
-  await Hive.initFlutter();
-  var box = await Hive.openBox('cashbox');
-  Hive.init(box.path);
+  WidgetsFlutterBinding.ensureInitialized();
+  var directory = await getApplicationDocumentsDirectory();
+  Hive.init(directory.path);
+
+  Hive.registerAdapter(CashModelAdapter());
+  await Hive.openBox<CashModel>('cashbook');
+
   runApp(MaterialApp(
     initialRoute: '/',
     routes: {
