@@ -130,9 +130,15 @@ class _HomeState extends State<Home> {
                         myModels.length,
                             (int index) => DataRow(
                           cells: [
-                            DataCell(Text(myModels[index].date.toString())),
-                            DataCell(Text(myModels[index].cashIn.toString())),
-                            DataCell(Text(myModels[index].cashOut.toString())),
+                            DataCell(
+                                myModels[index].date == null ? Text('') : Text(DateFormat('yyyy-MM-dd').format(myModels[index].date!))
+                            ),
+                            DataCell(
+                                myModels[index].cashIn == null ? Text('') :Text(myModels[index].cashIn.toString())
+                            ),
+                            DataCell(
+                                myModels[index].cashOut == null ? Text('') :Text(myModels[index].cashOut.toString())
+                            ),
                           ],
                         ),
                       ),

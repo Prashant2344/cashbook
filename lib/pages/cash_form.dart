@@ -1,5 +1,4 @@
 import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:cashbook/models/cash_model.dart';
 import 'package:intl/intl.dart';
@@ -26,7 +25,7 @@ class _CashFormState extends State<CashForm> {
 
   void _onButtonPressed() async{
     final dateString = _dateController.text;
-    final format = DateFormat('yyyy/MM/dd');
+    final format = DateFormat('M/d/yyyy');
 
     try {
       final formatedDate = format.parse(dateString);
@@ -34,7 +33,6 @@ class _CashFormState extends State<CashForm> {
       final data = CashModel(
           date: formatedDate,
           cashIn: double.parse(_amountController.text),
-          cashOut: double.parse(_amountController.text),
           description: _noteController.text
       );
 
@@ -94,9 +92,10 @@ class _CashFormState extends State<CashForm> {
               padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
               child: TextField(
                 controller: _amountController,
+                keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
-                  hintText: 'Enter a amount',
+                  hintText: 'Enter amount',
                   suffixIcon: Icon(Icons.money_sharp),
                 ),
               ),
