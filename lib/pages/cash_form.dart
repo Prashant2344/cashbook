@@ -1,6 +1,11 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:cashbook/models/cash_model.dart';
 import 'package:intl/intl.dart';
 import 'package:hive/hive.dart';
+import 'package:cashbook/boxes/cashes.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'dart:convert';
 
@@ -13,46 +18,40 @@ class CashForm extends StatefulWidget {
 
 class _CashFormState extends State<CashForm> {
   DateTime selectedDate = DateTime.now();
-  final _cashBox = Hive.box('cashbook');
+
 
   TextEditingController _amountController = TextEditingController();
   TextEditingController _noteController = TextEditingController();
   TextEditingController _dateController = TextEditingController();
 
-  String _amount = '';
-  String _note = '';
-  String _date = '';
-
   void _onButtonPressed() async{
-    setState(() {
-      _amount = _amountController.text;
-      _note = _noteController.text;
-      _date = _dateController.text;
-    });
-    Map<String, dynamic> data = {
-      'amount': _amount,
-      'note': _note,
-      'date': _date,
-    };
+    final dateString = _dateController.text;
+    final format = DateFormat('yyyy/MM/dd');
 
-    int jsonCount = 0;
-    for (var key in _cashBox.keys) {
-      final value = _cashBox.get(key);
-      if (value is String) {
-        try {
-          final json = jsonDecode(value);
-          _cashBox.put(key, json); // overwrite the string value with the JSON object
-        } catch (e) {
-          // the value is not a valid JSON string
-        }
-      }
-      if (value is Map<String, dynamic>) {
-        jsonCount++;
-      }
+    try {
+      final formatedDate = format.parse(dateString);
+
+      final data = CashModel(
+          date: formatedDate,
+          cashIn: double.parse(_amountController.text),
+          cashOut: double.parse(_amountController.text),
+          description: _noteController.text
+      );
+
+      final cashEntry = Cashes.getData();
+      cashEntry.add(data);
+      data.save();
+
+      _amountController.clear();
+      _noteController.clear();
+      _dateController.clear();
+
+      print(cashEntry);
+      print("abcd");
+      Navigator.pushNamed(context, '/');
+    }catch(e){
+      print('Invalid date format $e');
     }
-    await _cashBox.put(jsonCount+1, jsonEncode(data));
-    print(_cashBox.get(1));
-    print(jsonCount);
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -70,8 +69,8 @@ class _CashFormState extends State<CashForm> {
   }
 
   void writeData(){
-    _cashBox.put(1, "Prashant");
-    print(_cashBox.get(1));
+    // _cashBox.put(1, "Prashant");
+    // print(_cashBox.get(1));
   }
 
   void readData(){

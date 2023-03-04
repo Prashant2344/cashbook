@@ -1,5 +1,9 @@
+import 'package:cashbook/boxes/cashes.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:cashbook/models/cash_model.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -82,33 +86,90 @@ class _HomeState extends State<Home> {
                 ),
               ],
             ),
-            SingleChildScrollView(
-              child: DataTable(
-                columns: [
-                  DataColumn(
-                    label: Text('Date'),
-                  ),
-                  DataColumn(
-                    label: Text('Cash In'),
-                  ),
-                  DataColumn(
-                    label: Text('Cash Out'),
-                  ),
-                ],
-                rows: List<DataRow>.generate(
-                  data.length,
-                      (int index) {
-                    return DataRow(
-                      cells: [
-                        DataCell(Text(data[index][0])),
-                        DataCell(Text(data[index][1])),
-                        DataCell(Text(data[index][2])),
+
+            //Data table
+            Container(
+              height: 300.0,
+              child: ValueListenableBuilder<Box<CashModel>>(
+                valueListenable: Cashes.getData().listenable(),
+                builder: (BuildContext context, Box<CashModel> box, _) {
+                  final myModels = box.values.toList().cast<CashModel>();
+                  // return SingleChildScrollView(
+                  //   scrollDirection: Axis.horizontal,
+                  //   child: ConstrainedBox(
+                  //     constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
+                  //     child: DataTable(
+                  //       columns: [
+                  //         DataColumn(label: Text('Date')),
+                  //         DataColumn(label: Text('Cash In')),
+                  //         DataColumn(label: Text('Cash Out')),
+                  //       ],
+                  //       rows: List<DataRow>.generate(
+                  //         myModels.length,
+                  //             (int index) => DataRow(
+                  //           cells: [
+                  //             DataCell(Text(myModels[index].date.toString())),
+                  //             DataCell(Text(myModels[index].cashIn.toString())),
+                  //             DataCell(Text(myModels[index].cashOut.toString())),
+                  //           ],
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // );
+
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.vertical,
+                    child: DataTable(
+                      columns: [
+                        DataColumn(label: Text('Date')),
+                        DataColumn(label: Text('Cash In')),
+                        DataColumn(label: Text('Cash Out')),
                       ],
-                    );
-                  },
-                ),
+                      rows: List<DataRow>.generate(
+                        myModels.length,
+                            (int index) => DataRow(
+                          cells: [
+                            DataCell(Text(myModels[index].date.toString())),
+                            DataCell(Text(myModels[index].cashIn.toString())),
+                            DataCell(Text(myModels[index].cashOut.toString())),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+
+                },
               ),
             ),
+
+            // SingleChildScrollView(
+            //   child: DataTable(
+            //     columns: [
+            //       DataColumn(
+            //         label: Text('Date'),
+            //       ),
+            //       DataColumn(
+            //         label: Text('Cash In'),
+            //       ),
+            //       DataColumn(
+            //         label: Text('Cash Out'),
+            //       ),
+            //     ],
+            //     rows: List<DataRow>.generate(
+            //       data.length,
+            //           (int index) {
+            //         return DataRow(
+            //           cells: [
+            //             DataCell(Text(data[index][0])),
+            //             DataCell(Text(data[index][1])),
+            //             DataCell(Text(data[index][2])),
+            //           ],
+            //         );
+            //       },
+            //     ),
+            //   ),
+            // ),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
