@@ -98,7 +98,8 @@ class _HomeState extends State<Home> {
             Expanded(
               flex: 12,
               child: Container(
-                height: 300.0,
+                width: double.infinity,
+                // height: 300.0,
                 child: ValueListenableBuilder<Box<CashModel>>(
                   valueListenable: Cashes.getData().listenable(),
                   builder: (BuildContext context, Box<CashModel> box, _) {
