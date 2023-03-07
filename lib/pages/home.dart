@@ -14,6 +14,15 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   final List<String> _buttonTitles = ['All', 'Daily', 'Weekly', 'Monthly', 'Yearly'];
+  // late Box<CashModel> _cashBox;
+  // List<CashModel> _transactions = [];
+  //
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _cashBox = Hive.box<CashModel>('cashBox');
+  //   _transactions = _cashBox.values.cast<CashModel>().toList();
+  // }
 
   final List<List<String>> data = [
     ['March 1', '500', '-'],
@@ -36,6 +45,53 @@ class _HomeState extends State<Home> {
       _selectedDate = _selectedDate.subtract(Duration(days: 1));
     });
   }
+
+  double _calculateCashInAmount(Box<CashModel> box) {
+    return box.values.cast<CashModel>()
+        .fold<double>(0.0, (total, transaction) =>
+    total + (transaction.cashIn?.toDouble() ?? 0.0)
+    );
+  }
+
+  double _calculateCashOutAmount(Box<CashModel> box){
+    // double totalCost = 0.0;
+    // final transactions = box.values.toList().cast<CashModel>();
+    // for (final transaction in transactions) {
+    //   final cost = transaction.cashOut ?? 0.0 as double;
+    //   totalCost += cost;
+    // }
+    // return totalCost;
+
+    return box.values.cast<CashModel>()
+        .fold<double>(0.0, (total, transaction) =>
+    total + (transaction.cashOut?.toDouble() ?? 0.0)
+    );
+  }
+
+  double _balanceAmount(Box<CashModel> box){
+    return _calculateCashInAmount(box) - _calculateCashOutAmount(box);
+  }
+
+  double _previousBalanceAmount(Box<CashModel> box){
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    return box.values.cast<CashModel>()
+        .fold<double>(0.0, (total, transaction) {
+      if (transaction.date?.year != null && transaction.date?.month != null && transaction.date?.day != null) {
+        final transactionDate = DateTime(transaction.date!.year, transaction.date!.month, transaction.date!.day);
+        if (transactionDate.isBefore(todayDate)) {
+          final cashIn = transaction.cashIn?.toDouble() ?? 0.0;
+          return total + cashIn;
+        }
+      }
+      return total;
+    });
+  }
+
+  double _finalBalanceAmount(Box<CashModel> box){
+    return _balanceAmount(box) - _previousBalanceAmount(box);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -235,17 +291,37 @@ class _HomeState extends State<Home> {
                   children: [
                     TableRow(
                       children: [
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('Total Cash In'),
+                        ValueListenableBuilder<Box<CashModel>>(
+                          valueListenable: Cashes.getData().listenable(),
+                          builder: (BuildContext context,Box<CashModel> box, _) {
+                            final totalCashIn = _calculateCashInAmount(box); // assuming you have a function that calculates total cost
+                            return Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Text('Total Cash In $totalCashIn'),
+                            );
+                          },
                         ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('Total Cash Out'),
+
+                        ValueListenableBuilder<Box<CashModel>>(
+                          valueListenable: Cashes.getData().listenable(),
+                          builder: (BuildContext context,Box<CashModel> box, _) {
+                            final totalCashOut = _calculateCashOutAmount(box); // assuming you have a function that calculates total cost
+                            return Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Text('Total Cash Out $totalCashOut'),
+                            );
+                          },
                         ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('Balance'),
+
+                        ValueListenableBuilder<Box<CashModel>>(
+                          valueListenable: Cashes.getData().listenable(),
+                          builder: (BuildContext context,Box<CashModel> box, _) {
+                            final balance = _balanceAmount(box); // assuming you have a function that calculates total cost
+                            return Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Text('Balance $balance'),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -259,9 +335,15 @@ class _HomeState extends State<Home> {
                           padding: EdgeInsets.all(8.0),
                           child: Text('Previous Balance'),
                         ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('500'),
+                        ValueListenableBuilder<Box<CashModel>>(
+                          valueListenable: Cashes.getData().listenable(),
+                          builder: (BuildContext context,Box<CashModel> box, _) {
+                            final prevBalance = _previousBalanceAmount(box); // assuming you have a function that calculates total cost
+                            return Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Text('$prevBalance'),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -275,9 +357,15 @@ class _HomeState extends State<Home> {
                           padding: EdgeInsets.all(8.0),
                           child: Text('Balance'),
                         ),
-                        Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Text('500'),
+                        ValueListenableBuilder<Box<CashModel>>(
+                          valueListenable: Cashes.getData().listenable(),
+                          builder: (BuildContext context,Box<CashModel> box, _) {
+                            final balance = _finalBalanceAmount(box); // assuming you have a function that calculates total cost
+                            return Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Text('$balance'),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -288,6 +376,12 @@ class _HomeState extends State<Home> {
           ],
         ),
       ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     _calculateAmount();
+      //   },
+      //   child: Icon(Icons.add),
+      // ),
     );
   }
 }
