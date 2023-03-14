@@ -141,7 +141,8 @@ class _HomeState extends State<Home> {
         final transactionDate = DateTime(transaction.date!.year, transaction.date!.month, transaction.date!.day);
         if (transactionDate.isBefore(beginingDateForFilter)) {
           final cashIn = transaction.cashIn?.toDouble() ?? 0.0;
-          return total + cashIn;
+          final cashOut = transaction.cashOut?.toDouble() ?? 0.0;
+          return total + cashIn - cashOut;
         }
       }
       return total;
