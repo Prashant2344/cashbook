@@ -13,7 +13,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final List<String> _buttonTitles = ['All', 'Daily', 'Weekly', 'Monthly', 'Yearly'];
+  int _selectedIndex = 1;
+  final List<String> _buttonTitles = ['All', 'Daily', 'Weekly', 'Monthly', 'Yearly']; //index 0,1,2,3,4
   // late Box<CashModel> _cashBox;
   // List<CashModel> _transactions = [];
   //
@@ -32,54 +33,113 @@ class _HomeState extends State<Home> {
     ['March 6', '1000', '-'],
   ];
 
+  // DateTime _selectedDate = DateTime.now();
+
+  DateTime today = DateTime.now();
+  DateTime _beginingDateForFilter = DateTime.now();
+  DateTime _endingDateForFilter = DateTime.now();
+  // DateTime _endingDateForFilter = DateTime.now().subtract(Duration(days: 1));
   DateTime _selectedDate = DateTime.now();
 
-  void _incrementDate() {
+  // DateTime startDate = DateTime.now();
+  // DateTime endDate = DateTime.now();
+  void _onTitlesTapped(int index) {
     setState(() {
-      _selectedDate = _selectedDate.add(Duration(days: 1));
+      _selectedIndex = index;
     });
+    if(_selectedIndex == 1){
+      setState(() {
+        _beginingDateForFilter = DateTime.now();
+        _endingDateForFilter = DateTime.now();
+        _selectedDate = DateTime.now();
+      });
+    }else if(_selectedIndex == 2){
+      setState(() {
+        _selectedDate = DateTime.now();
+        _beginingDateForFilter = _selectedDate.subtract(Duration(days: _selectedDate.weekday ));
+        _endingDateForFilter = _beginingDateForFilter.add(Duration(days: 6));
+      });
+    }
+  }
+
+  void _incrementDate() {
+    if(_selectedIndex == 1) {
+      setState(() {
+        _beginingDateForFilter = _beginingDateForFilter.add(Duration(days: 1));
+        _endingDateForFilter = _endingDateForFilter.add(Duration(days: 1));
+        _selectedDate = _selectedDate.add(Duration(days: 1));
+      });
+    }else if(_selectedIndex == 2){
+      setState(() {
+        _beginingDateForFilter = _beginingDateForFilter.add(Duration(days: 7));
+        _endingDateForFilter = _endingDateForFilter.add(Duration(days: 7));
+        _selectedDate = _selectedDate.add(Duration(days: 7));
+      });
+    }
+
   }
 
   void _decrementDate() {
-    setState(() {
-      _selectedDate = _selectedDate.subtract(Duration(days: 1));
-    });
+    if(_selectedIndex == 1) {
+      setState(() {
+        _beginingDateForFilter = _beginingDateForFilter.subtract(Duration(days: 1));
+        _endingDateForFilter = _endingDateForFilter.subtract(Duration(days: 1));
+        _selectedDate = _selectedDate.subtract(Duration(days: 1));
+      });
+    }else if(_selectedIndex == 2){
+      setState(() {
+        _beginingDateForFilter = _beginingDateForFilter.subtract(Duration(days: 7));
+        _endingDateForFilter = _endingDateForFilter.subtract(Duration(days: 7));
+        _selectedDate = _selectedDate.subtract(Duration(days: 7));
+      });
+    }
   }
 
-  double _calculateCashInAmount(Box<CashModel> box) {
+  double _calculateCashInAmount(Box<CashModel> box,beginingDateForFilter,endingDateForFilter) {
+    // DateTime startDate = beginingDateForFilter.subtract(const Duration(days: 1));
+    DateTime startDate = DateTime(beginingDateForFilter.year, beginingDateForFilter.month, beginingDateForFilter.day);
+    // DateTime endDate = endingDateForFilter.add(const Duration(days: 1));
+    DateTime endDate = DateTime(endingDateForFilter.year, endingDateForFilter.month, endingDateForFilter.day);
     return box.values.cast<CashModel>()
-        .fold<double>(0.0, (total, transaction) =>
-    total + (transaction.cashIn?.toDouble() ?? 0.0)
+      .where((transaction) =>
+        transaction.date != null &&
+        transaction.date!.isAtSameMomentAs(startDate) ||
+        transaction.date!.isAfter(startDate) &&
+        transaction.date!.isBefore(endDate)||
+            transaction.date!.isAtSameMomentAs(endDate))
+      .fold<double>(0.0, (total, transaction) =>
+        total + (transaction.cashIn?.toDouble() ?? 0.0)
     );
   }
 
-  double _calculateCashOutAmount(Box<CashModel> box){
-    // double totalCost = 0.0;
-    // final transactions = box.values.toList().cast<CashModel>();
-    // for (final transaction in transactions) {
-    //   final cost = transaction.cashOut ?? 0.0 as double;
-    //   totalCost += cost;
-    // }
-    // return totalCost;
-
+  double _calculateCashOutAmount(Box<CashModel> box,beginingDateForFilter,endingDateForFilter){
+    DateTime startDate = DateTime(beginingDateForFilter.year, beginingDateForFilter.month, beginingDateForFilter.day);
+    DateTime endDate = DateTime(endingDateForFilter.year, endingDateForFilter.month, endingDateForFilter.day);
     return box.values.cast<CashModel>()
+        .where((transaction) =>
+    transaction.date != null &&
+        transaction.date!.isAtSameMomentAs(startDate) ||
+        transaction.date!.isAfter(startDate) &&
+            transaction.date!.isBefore(endDate)||
+        transaction.date!.isAtSameMomentAs(endDate))
         .fold<double>(0.0, (total, transaction) =>
     total + (transaction.cashOut?.toDouble() ?? 0.0)
     );
   }
 
   double _balanceAmount(Box<CashModel> box){
-    return _calculateCashInAmount(box) - _calculateCashOutAmount(box);
+    return _calculateCashInAmount(box,_beginingDateForFilter,_endingDateForFilter) - _calculateCashOutAmount(box,_beginingDateForFilter,_endingDateForFilter);
   }
 
-  double _previousBalanceAmount(Box<CashModel> box){
-    final today = DateTime.now();
-    final todayDate = DateTime(today.year, today.month, today.day);
+  double _previousBalanceAmount(Box<CashModel> box,_beginingDateForFilter){
+    // final today = DateTime.now();
+    // final todayDate = DateTime(today.year, today.month, today.day);
+    final beginingDateForFilter = DateTime(_beginingDateForFilter.year, _beginingDateForFilter.month, _beginingDateForFilter.day);
     return box.values.cast<CashModel>()
         .fold<double>(0.0, (total, transaction) {
       if (transaction.date?.year != null && transaction.date?.month != null && transaction.date?.day != null) {
         final transactionDate = DateTime(transaction.date!.year, transaction.date!.month, transaction.date!.day);
-        if (transactionDate.isBefore(todayDate)) {
+        if (transactionDate.isBefore(beginingDateForFilter)) {
           final cashIn = transaction.cashIn?.toDouble() ?? 0.0;
           return total + cashIn;
         }
@@ -89,12 +149,31 @@ class _HomeState extends State<Home> {
   }
 
   double _finalBalanceAmount(Box<CashModel> box){
-    return _balanceAmount(box) - _previousBalanceAmount(box);
+    return _balanceAmount(box) + _previousBalanceAmount(box,_beginingDateForFilter);
+  }
+
+  List<CashModel> _getCashList(Box<CashModel> box,beginingDateForFilter,endingDateForFilter){
+    DateTime startDate = beginingDateForFilter.subtract(const Duration(days: 1));
+    DateTime endDate = endingDateForFilter.add(const Duration(days: 1));
+    // DateTime startDate = DateTime(beginingDateForFilter.year, beginingDateForFilter.month, beginingDateForFilter.day);
+    // DateTime endDate = DateTime(endingDateForFilter.year, endingDateForFilter.month, endingDateForFilter.day);
+
+
+    startDate = DateTime(startDate.year, startDate.month, startDate.day);
+    endDate = DateTime(endDate.year, endDate.month, endDate.day);
+    return box.values.toList().cast<CashModel>().where((transaction) {
+      if (transaction.date == null) {
+        return false;
+      }
+      DateTime transactionDate = DateTime(transaction.date!.year, transaction.date!.month, transaction.date!.day);
+      return transactionDate.isAfter(startDate) && transactionDate.isBefore(endDate);
+    }).toList();
   }
 
 
   @override
   Widget build(BuildContext context) {
+    bool isToday = _selectedDate.year == today.year && _selectedDate.month == today.month && _selectedDate.day == today.day;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue[600],
@@ -113,7 +192,7 @@ class _HomeState extends State<Home> {
                   _buttonTitles.length,
                       (index) => ElevatedButton(
                     onPressed: () {
-                      // Add your onPressed code here.
+                      _onTitlesTapped(index);
                     },
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(Colors.blueGrey),
@@ -132,16 +211,28 @@ class _HomeState extends State<Home> {
             Expanded(
               flex: 1,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
                     onPressed: _decrementDate,
                     icon: Icon(Icons.arrow_left),
                   ),
-                  Text(
-                    DateFormat('EEE, MMM dd').format(_selectedDate),
-                    style: TextStyle(fontSize: 18.0),
+                  SizedBox(width: 16),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${DateFormat('d MMM y').format(_beginingDateForFilter)}',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      if(!isToday || _selectedIndex != 1)
+                        Text(
+                          '  ->  ${DateFormat('d MMM y').format(_endingDateForFilter)}',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                    ],
                   ),
+                  SizedBox(width: 16),
                   IconButton(
                     onPressed: _incrementDate,
                     icon: Icon(Icons.arrow_right),
@@ -159,7 +250,7 @@ class _HomeState extends State<Home> {
                 child: ValueListenableBuilder<Box<CashModel>>(
                   valueListenable: Cashes.getData().listenable(),
                   builder: (BuildContext context, Box<CashModel> box, _) {
-                    final myModels = box.values.toList().cast<CashModel>();
+                    final myData = _getCashList(box, _beginingDateForFilter,_endingDateForFilter);
                     // return SingleChildScrollView(
                     //   scrollDirection: Axis.horizontal,
                     //   child: ConstrainedBox(
@@ -171,12 +262,12 @@ class _HomeState extends State<Home> {
                     //         DataColumn(label: Text('Cash Out')),
                     //       ],
                     //       rows: List<DataRow>.generate(
-                    //         myModels.length,
+                    //         myData.length,
                     //             (int index) => DataRow(
                     //           cells: [
-                    //             DataCell(Text(myModels[index].date.toString())),
-                    //             DataCell(Text(myModels[index].cashIn.toString())),
-                    //             DataCell(Text(myModels[index].cashOut.toString())),
+                    //             DataCell(Text(myData[index].date.toString())),
+                    //             DataCell(Text(myData[index].cashIn.toString())),
+                    //             DataCell(Text(myData[index].cashOut.toString())),
                     //           ],
                     //         ),
                     //       ),
@@ -193,24 +284,23 @@ class _HomeState extends State<Home> {
                           DataColumn(label: Text('Cash Out')),
                         ],
                         rows: List<DataRow>.generate(
-                          myModels.length,
+                          myData.length,
                               (int index) => DataRow(
                             cells: [
                               DataCell(
-                                  myModels[index].date == null ? Text('') : Text(DateFormat('yyyy-MM-dd').format(myModels[index].date!))
+                                  myData[index].date == null ? Text('') : Text(DateFormat('yyyy-MM-dd').format(myData[index].date!))
                               ),
                               DataCell(
-                                  myModels[index].cashIn == null ? Text('') :Text(myModels[index].cashIn.toString())
+                                  myData[index].cashIn == null ? Text('') :Text(myData[index].cashIn.toString())
                               ),
                               DataCell(
-                                  myModels[index].cashOut == null ? Text('') :Text(myModels[index].cashOut.toString())
+                                  myData[index].cashOut == null ? Text('') :Text(myData[index].cashOut.toString())
                               ),
                             ],
                           ),
                         ),
                       ),
                     );
-
                   },
                 ),
               ),
@@ -294,7 +384,7 @@ class _HomeState extends State<Home> {
                         ValueListenableBuilder<Box<CashModel>>(
                           valueListenable: Cashes.getData().listenable(),
                           builder: (BuildContext context,Box<CashModel> box, _) {
-                            final totalCashIn = _calculateCashInAmount(box); // assuming you have a function that calculates total cost
+                            final totalCashIn = _calculateCashInAmount(box,_beginingDateForFilter,_endingDateForFilter);
                             return Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: Text('Total Cash In $totalCashIn'),
@@ -305,7 +395,7 @@ class _HomeState extends State<Home> {
                         ValueListenableBuilder<Box<CashModel>>(
                           valueListenable: Cashes.getData().listenable(),
                           builder: (BuildContext context,Box<CashModel> box, _) {
-                            final totalCashOut = _calculateCashOutAmount(box); // assuming you have a function that calculates total cost
+                            final totalCashOut = _calculateCashOutAmount(box,_beginingDateForFilter,_endingDateForFilter);
                             return Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: Text('Total Cash Out $totalCashOut'),
@@ -316,7 +406,7 @@ class _HomeState extends State<Home> {
                         ValueListenableBuilder<Box<CashModel>>(
                           valueListenable: Cashes.getData().listenable(),
                           builder: (BuildContext context,Box<CashModel> box, _) {
-                            final balance = _balanceAmount(box); // assuming you have a function that calculates total cost
+                            final balance = _balanceAmount(box);
                             return Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: Text('Balance $balance'),
@@ -338,7 +428,7 @@ class _HomeState extends State<Home> {
                         ValueListenableBuilder<Box<CashModel>>(
                           valueListenable: Cashes.getData().listenable(),
                           builder: (BuildContext context,Box<CashModel> box, _) {
-                            final prevBalance = _previousBalanceAmount(box); // assuming you have a function that calculates total cost
+                            final prevBalance = _previousBalanceAmount(box,_beginingDateForFilter);
                             return Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: Text('$prevBalance'),
@@ -360,7 +450,7 @@ class _HomeState extends State<Home> {
                         ValueListenableBuilder<Box<CashModel>>(
                           valueListenable: Cashes.getData().listenable(),
                           builder: (BuildContext context,Box<CashModel> box, _) {
-                            final balance = _finalBalanceAmount(box); // assuming you have a function that calculates total cost
+                            final balance = _finalBalanceAmount(box);
                             return Padding(
                               padding: const EdgeInsets.all(5.0),
                               child: Text('$balance'),
