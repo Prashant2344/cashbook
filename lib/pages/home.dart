@@ -59,6 +59,30 @@ class _HomeState extends State<Home> {
         _beginingDateForFilter = _selectedDate.subtract(Duration(days: _selectedDate.weekday ));
         _endingDateForFilter = _beginingDateForFilter.add(Duration(days: 6));
       });
+    }else if(_selectedIndex == 3){
+      setState(() {
+        _selectedDate = DateTime.now();
+        DateTime beginingDate = DateTime(_selectedDate.year, _selectedDate.month, 1);
+        _beginingDateForFilter = DateTime(beginingDate.year, beginingDate.month, beginingDate.day);
+        DateTime endingDate = DateTime(_selectedDate.year, _selectedDate.month + 1, 0);
+        _endingDateForFilter = DateTime(endingDate.year, endingDate.month, endingDate.day);
+      });
+    }else if(_selectedIndex == 4){
+      setState(() {
+        _selectedDate = DateTime.now();
+        DateTime beginingDate = DateTime(_selectedDate.year, 1, 1);
+        _beginingDateForFilter = DateTime(beginingDate.year, beginingDate.month, beginingDate.day);
+        DateTime endingDate = DateTime(_selectedDate.year, 12, 31);
+        _endingDateForFilter = DateTime(endingDate.year, endingDate.month, endingDate.day);
+      });
+    }else if(_selectedIndex == 0){
+      setState(() {
+        _selectedDate = DateTime.now();
+        DateTime beginingDate = DateTime(_selectedDate.year - 100, 1, 1);
+        _beginingDateForFilter = DateTime(beginingDate.year, beginingDate.month, beginingDate.day);
+        DateTime endingDate = DateTime(_selectedDate.year + 100, 12, 31);
+        _endingDateForFilter = DateTime(endingDate.year, endingDate.month, endingDate.day);
+      });
     }
   }
 
@@ -75,8 +99,32 @@ class _HomeState extends State<Home> {
         _endingDateForFilter = _endingDateForFilter.add(Duration(days: 7));
         _selectedDate = _selectedDate.add(Duration(days: 7));
       });
+    }else if(_selectedIndex == 3){
+      DateTime nextMonth = DateTime(_beginingDateForFilter.year, _beginingDateForFilter.month + 1, 1);
+      DateTime startOfNextMonth = DateTime(nextMonth.year, nextMonth.month, 1);
+      DateTime endOfNextMonth = DateTime(nextMonth.year, nextMonth.month + 1, 0);
+      setState(() {
+        _beginingDateForFilter = DateTime(startOfNextMonth.year, startOfNextMonth.month, startOfNextMonth.day);
+        _endingDateForFilter = DateTime(endOfNextMonth.year, endOfNextMonth.month, endOfNextMonth.day);
+        _selectedDate = DateTime(startOfNextMonth.year, startOfNextMonth.month, startOfNextMonth.day);
+      });
+    }else if(_selectedIndex == 4){
+      DateTime startOfNextYear = DateTime(_beginingDateForFilter.year + 1, 1, 1);
+      DateTime endOfNextYear = DateTime(_beginingDateForFilter.year + 1, 12, 31);
+      setState(() {
+        _beginingDateForFilter = DateTime(startOfNextYear.year, startOfNextYear.month, startOfNextYear.day);
+        _endingDateForFilter = DateTime(endOfNextYear.year, endOfNextYear.month, endOfNextYear.day);
+        _selectedDate = DateTime(startOfNextYear.year, startOfNextYear.month, startOfNextYear.day);
+      });
+    }else if(_selectedIndex == 0){
+      DateTime startOfNextYear = DateTime(_beginingDateForFilter.year + 100, 1, 1);
+      DateTime endOfNextYear = DateTime(_beginingDateForFilter.year + 100, 12, 31);
+      setState(() {
+        _beginingDateForFilter = DateTime(startOfNextYear.year, startOfNextYear.month, startOfNextYear.day);
+        _endingDateForFilter = DateTime(endOfNextYear.year, endOfNextYear.month, endOfNextYear.day);
+        _selectedDate = DateTime(startOfNextYear.year, startOfNextYear.month, startOfNextYear.day);
+      });
     }
-
   }
 
   void _decrementDate() {
@@ -91,6 +139,31 @@ class _HomeState extends State<Home> {
         _beginingDateForFilter = _beginingDateForFilter.subtract(Duration(days: 7));
         _endingDateForFilter = _endingDateForFilter.subtract(Duration(days: 7));
         _selectedDate = _selectedDate.subtract(Duration(days: 7));
+      });
+    }else if(_selectedIndex == 3){
+      DateTime lastMonth = DateTime(_beginingDateForFilter.year, _beginingDateForFilter.month - 1, 1);
+      DateTime startOfLastMonth = DateTime(lastMonth.year, lastMonth.month, 1);
+      DateTime endOfLastMonth = DateTime(_beginingDateForFilter.year, _beginingDateForFilter.month, 0);
+      setState(() {
+        _beginingDateForFilter = DateTime(startOfLastMonth.year, startOfLastMonth.month, startOfLastMonth.day);
+        _endingDateForFilter = DateTime(endOfLastMonth.year, endOfLastMonth.month, endOfLastMonth.day);
+        _selectedDate = DateTime(startOfLastMonth.year, startOfLastMonth.month, startOfLastMonth.day);
+      });
+    }else if(_selectedIndex == 4){
+      DateTime startOfLastYear = DateTime(_beginingDateForFilter.year - 1, 1, 1);
+      DateTime endOfLastYear = DateTime(_beginingDateForFilter.year - 1, 12, 31);
+      setState(() {
+        _beginingDateForFilter = DateTime(startOfLastYear.year, startOfLastYear.month, startOfLastYear.day);
+        _endingDateForFilter = DateTime(endOfLastYear.year, endOfLastYear.month, endOfLastYear.day);
+        _selectedDate = DateTime(startOfLastYear.year, startOfLastYear.month, startOfLastYear.day);
+      });
+    }else if(_selectedIndex == 0){
+      DateTime startOfLastYear = DateTime(_beginingDateForFilter.year - 100, 1, 1);
+      DateTime endOfLastYear = DateTime(_beginingDateForFilter.year - 100, 12, 31);
+      setState(() {
+        _beginingDateForFilter = DateTime(startOfLastYear.year, startOfLastYear.month, startOfLastYear.day);
+        _endingDateForFilter = DateTime(endOfLastYear.year, endOfLastYear.month, endOfLastYear.day);
+        _selectedDate = DateTime(startOfLastYear.year, startOfLastYear.month, startOfLastYear.day);
       });
     }
   }
@@ -214,27 +287,39 @@ class _HomeState extends State<Home> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  IconButton(
-                    onPressed: _decrementDate,
-                    icon: Icon(Icons.arrow_left),
-                  ),
+                  if (_selectedIndex != 0)
+                    IconButton(
+                      onPressed: _decrementDate,
+                      icon: Icon(Icons.arrow_left),
+                    ),
                   SizedBox(width: 16),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
+                      _selectedIndex == 0
+                          ? Text(
+                        'All',
+                        style: TextStyle(fontSize: 16),
+                      )
+                          : Text(
                         '${DateFormat('d MMM y').format(_beginingDateForFilter)}',
                         style: TextStyle(fontSize: 16),
                       ),
-                      if(!isToday || _selectedIndex != 1)
-                        Text(
+                      if (!isToday || _selectedIndex != 1)
+                        _selectedIndex == 0
+                            ? Text(
+                          '',
+                          style: TextStyle(fontSize: 16),
+                        )
+                         : Text(
                           '  ->  ${DateFormat('d MMM y').format(_endingDateForFilter)}',
                           style: TextStyle(fontSize: 16),
                         ),
                     ],
                   ),
                   SizedBox(width: 16),
-                  IconButton(
+                  if (_selectedIndex != 0)
+                    IconButton(
                     onPressed: _incrementDate,
                     icon: Icon(Icons.arrow_right),
                   ),
