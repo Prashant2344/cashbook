@@ -269,7 +269,7 @@ class _HomeState extends State<Home> {
                       _onTitlesTapped(index);
                     },
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(Colors.blueGrey),
+                      backgroundColor: MaterialStateProperty.all<Color>(_selectedIndex == index ? Colors.blue : Colors.blueGrey),
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18.0),
