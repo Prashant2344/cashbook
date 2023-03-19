@@ -22,4 +22,8 @@ class CashModel extends HiveObject{
     this.cashOut,
     this.description
   });
+
+  DateTime get transactionDate {
+    return DateTime(date!.year, date!.month, date!.day);
+  }
 }

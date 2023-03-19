@@ -15,34 +15,12 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int _selectedIndex = 1;
   final List<String> _buttonTitles = ['All', 'Daily', 'Weekly', 'Monthly', 'Yearly']; //index 0,1,2,3,4
-  // late Box<CashModel> _cashBox;
-  // List<CashModel> _transactions = [];
-  //
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _cashBox = Hive.box<CashModel>('cashBox');
-  //   _transactions = _cashBox.values.cast<CashModel>().toList();
-  // }
-
-  final List<List<String>> data = [
-    ['March 1', '500', '-'],
-    ['March 2', '600', '-'],
-    ['March 3', '-', '700'],
-    ['March 4', '-', '100'],
-    ['March 6', '1000', '-'],
-  ];
-
-  // DateTime _selectedDate = DateTime.now();
 
   DateTime today = DateTime.now();
   DateTime _beginingDateForFilter = DateTime.now();
   DateTime _endingDateForFilter = DateTime.now();
-  // DateTime _endingDateForFilter = DateTime.now().subtract(Duration(days: 1));
   DateTime _selectedDate = DateTime.now();
 
-  // DateTime startDate = DateTime.now();
-  // DateTime endDate = DateTime.now();
   void _onTitlesTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -235,13 +213,15 @@ class _HomeState extends State<Home> {
 
     startDate = DateTime(startDate.year, startDate.month, startDate.day);
     endDate = DateTime(endDate.year, endDate.month, endDate.day);
-    return box.values.toList().cast<CashModel>().where((transaction) {
+    List<CashModel> cashList =  box.values.toList().cast<CashModel>().where((transaction) {
       if (transaction.date == null) {
         return false;
       }
       DateTime transactionDate = DateTime(transaction.date!.year, transaction.date!.month, transaction.date!.day);
       return transactionDate.isAfter(startDate) && transactionDate.isBefore(endDate);
     }).toList();
+    cashList.sort((a, b) => a.transactionDate.compareTo(b.transactionDate)); // Sort in ascending order based on transactionDate
+    return cashList;
   }
 
 
@@ -337,29 +317,6 @@ class _HomeState extends State<Home> {
                   valueListenable: Cashes.getData().listenable(),
                   builder: (BuildContext context, Box<CashModel> box, _) {
                     final myData = _getCashList(box, _beginingDateForFilter,_endingDateForFilter);
-                    // return SingleChildScrollView(
-                    //   scrollDirection: Axis.horizontal,
-                    //   child: ConstrainedBox(
-                    //     constraints: BoxConstraints(minWidth: MediaQuery.of(context).size.width),
-                    //     child: DataTable(
-                    //       columns: [
-                    //         DataColumn(label: Text('Date')),
-                    //         DataColumn(label: Text('Cash In')),
-                    //         DataColumn(label: Text('Cash Out')),
-                    //       ],
-                    //       rows: List<DataRow>.generate(
-                    //         myData.length,
-                    //             (int index) => DataRow(
-                    //           cells: [
-                    //             DataCell(Text(myData[index].date.toString())),
-                    //             DataCell(Text(myData[index].cashIn.toString())),
-                    //             DataCell(Text(myData[index].cashOut.toString())),
-                    //           ],
-                    //         ),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // );
 
                     return SingleChildScrollView(
                       scrollDirection: Axis.vertical,
@@ -391,34 +348,6 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
-
-            // SingleChildScrollView(
-            //   child: DataTable(
-            //     columns: [
-            //       DataColumn(
-            //         label: Text('Date'),
-            //       ),
-            //       DataColumn(
-            //         label: Text('Cash In'),
-            //       ),
-            //       DataColumn(
-            //         label: Text('Cash Out'),
-            //       ),
-            //     ],
-            //     rows: List<DataRow>.generate(
-            //       data.length,
-            //           (int index) {
-            //         return DataRow(
-            //           cells: [
-            //             DataCell(Text(data[index][0])),
-            //             DataCell(Text(data[index][1])),
-            //             DataCell(Text(data[index][2])),
-            //           ],
-            //         );
-            //       },
-            //     ),
-            //   ),
-            // ),
 
             Expanded(
               flex: 2,
