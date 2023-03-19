@@ -220,7 +220,7 @@ class _HomeState extends State<Home> {
       DateTime transactionDate = DateTime(transaction.date!.year, transaction.date!.month, transaction.date!.day);
       return transactionDate.isAfter(startDate) && transactionDate.isBefore(endDate);
     }).toList();
-    cashList.sort((a, b) => a.transactionDate.compareTo(b.transactionDate)); // Sort in ascending order based on transactionDate
+    cashList.sort((a, b) => b.transactionDate.compareTo(a.transactionDate));
     return cashList;
   }
 
