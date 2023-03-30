@@ -334,10 +334,34 @@ class _HomeState extends State<Home> {
                                   myData[index].date == null ? Text('') : Text(DateFormat('yyyy-MM-dd').format(myData[index].date!))
                               ),
                               DataCell(
-                                  myData[index].cashIn == null ? Text('') :Text(myData[index].cashIn.toString())
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      myData[index].cashIn == null ? '' : '(' + (myData[index].description ?? '') + ')',
+                                      style: TextStyle(fontSize: 12.0, color: Colors.grey),
+                                    ),
+                                    Text(
+                                      myData[index].cashIn == null ? '' : myData[index].cashIn.toString(),
+                                      style: TextStyle(fontSize: 16.0),
+                                    ),
+                                  ],
+                                ),
                               ),
                               DataCell(
-                                  myData[index].cashOut == null ? Text('') :Text(myData[index].cashOut.toString())
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      myData[index].cashOut == null ? '' : '(' + (myData[index].description ?? '') + ')',
+                                      style: TextStyle(fontSize: 12.0, color: Colors.grey),
+                                    ),
+                                    Text(
+                                      myData[index].cashOut == null ? '' : myData[index].cashOut.toString(),
+                                      style: TextStyle(fontSize: 16.0),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
